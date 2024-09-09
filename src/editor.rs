@@ -196,7 +196,7 @@ impl Editor {
             "q!" => {
                 self.window = false;
             }
-            "wq" | "qw" => match self.buffer.save() {
+            "wq" => match self.buffer.save() {
                 Ok(_) => self.window = false,
                 Err(err) => self.draw_error(err.to_string())?,
             },
