@@ -1,8 +1,8 @@
-use clap::Parser;
-
 mod buffer;
 mod editor;
 mod event;
+
+use clap::Parser;
 
 #[macro_use]
 extern crate crossterm;

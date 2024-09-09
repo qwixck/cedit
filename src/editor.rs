@@ -20,7 +20,7 @@ pub struct Cursor {
     pub normal: (u16, u16),
     pub command: u16,
     pub r#virtual: u16,
-    pub _visual: (u16, u16)
+    pub _visual: (u16, u16),
 }
 
 #[derive(Debug)]
@@ -35,6 +35,17 @@ pub struct Editor {
     pub has_edited: bool,
 }
 
+impl std::fmt::Display for Modes {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Modes::Insert => write!(f, "INSERT"),
+            Modes::Normal => write!(f, "NORMAL"),
+            Modes::Commanding => write!(f, "COMMAND"),
+            Modes::_Visual => write!(f, "VISUAL"),
+        }
+    }
+}
+
 impl Editor {
     pub fn new(buffer: Buffer) -> Result<Self> {
         Ok(Self {
@@ -45,7 +56,7 @@ impl Editor {
                 normal: (0, 0),
                 command: 0,
                 r#virtual: 0,
-                _visual: (0, 0)
+                _visual: (0, 0),
             },
             size: terminal::size()?,
             screen: 0,
@@ -113,7 +124,7 @@ impl Editor {
 
     pub fn redraw_screen(&mut self) -> Result<()> {
         execute!(self.stdout, Clear(ClearType::All))?;
-        
+
         for i in self.screen..(self.screen + (self.size.1 - 1)) {
             execute!(self.stdout, cursor::MoveTo(0, i - self.screen))?;
 
@@ -123,7 +134,7 @@ impl Editor {
                 write!(self.stdout, "~")?;
             }
         }
-        self.redraw_status()?;  
+        self.redraw_status()?;
 
         Ok(())
     }
@@ -136,24 +147,15 @@ impl Editor {
         execute!(self.stdout, Clear(ClearType::CurrentLine))?;
 
         match self.mode {
-            Modes::Insert => {
+            Modes::Insert | Modes::Normal => {
                 execute!(self.stdout, cursor::MoveTo(0, self.size.1))?;
-                write!(self.stdout, "[INSERT]")?;
+                write!(self.stdout, "[{}]", self.mode)?;
                 execute!(self.stdout, cursor::MoveTo(self.size.0 - 18, self.size.1))?;
                 write!(
                     self.stdout,
                     "{}:{}",
-                    self.cursor.normal.1 + 1, self.cursor.normal.0 + 1
-                )?;
-            }
-            Modes::Normal => {
-                execute!(self.stdout, cursor::MoveTo(0, self.size.1))?;
-                write!(self.stdout, "[NORMAL]")?;
-                execute!(self.stdout, cursor::MoveTo(self.size.0 - 18, self.size.1))?;
-                write!(
-                    self.stdout,
-                    "{}:{}",
-                    self.cursor.normal.1 + 1, self.cursor.normal.0 + 1
+                    self.cursor.normal.1 + 1,
+                    self.cursor.normal.0 + 1
                 )?;
             }
             Modes::Commanding => {
@@ -194,9 +196,14 @@ impl Editor {
             "q!" => {
                 self.window = false;
             }
-            "wq" => match self.buffer.save() {
+            "wq" | "qw" => match self.buffer.save() {
                 Ok(_) => self.window = false,
                 Err(err) => self.draw_error(err.to_string())?,
+            },
+            "w" => {
+                if let Err(err) = self.buffer.save() {
+                    self.draw_error(err.to_string())?
+                }
             }
             ":" => self.redraw_status()?,
             unknown => {

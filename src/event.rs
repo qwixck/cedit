@@ -58,11 +58,13 @@ pub fn handle(editor: &mut crate::editor::Editor) -> std::io::Result<()> {
                                                 .lines
                                                 .remove(editor.cursor.normal.1 as usize);
                                             editor.cursor.normal.1 -= 1;
+
                                             if editor.screen != 0 {
                                                 editor.scroll_up()?;
                                             } else {
                                                 editor.cursor.r#virtual -= 1;
                                             }
+
                                             if editor.buffer.lines[editor.cursor.normal.1 as usize]
                                                 .len()
                                                 != 0
@@ -82,11 +84,13 @@ pub fn handle(editor: &mut crate::editor::Editor) -> std::io::Result<()> {
                                                 .lines
                                                 .remove(editor.cursor.normal.1 as usize);
                                             editor.cursor.normal.1 -= 1;
+
                                             if editor.screen != 0 {
                                                 editor.scroll_up()?;
                                             } else {
                                                 editor.cursor.r#virtual -= 1;
                                             }
+
                                             editor.cursor.normal.0 = editor.buffer.lines
                                                 [editor.cursor.normal.1 as usize]
                                                 .len()
