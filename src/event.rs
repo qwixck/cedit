@@ -1,5 +1,5 @@
 use crate::editor::Modes;
-use crossterm::event::{self, Event, KeyCode};
+use crossterm::event::{self, Event, KeyCode, KeyModifiers};
 
 pub fn handle(editor: &mut crate::editor::Editor) -> std::io::Result<()> {
     if event::poll(std::time::Duration::ZERO)? {
@@ -8,9 +8,7 @@ pub fn handle(editor: &mut crate::editor::Editor) -> std::io::Result<()> {
                 if event.kind == event::KeyEventKind::Press {
                     match event.code {
                         KeyCode::Char(x) => {
-                            if (x == 'i' || x == 'I') && editor.mode == Modes::Normal {
-                                editor.mode = Modes::Insert
-                            } else if x == ':' && editor.mode == Modes::Normal {
+                            if x == ':' && editor.mode == Modes::Normal {
                                 editor.mode = Modes::Commanding;
                                 editor.buffer.command.push(':');
                                 editor.cursor.command += 1;
@@ -39,6 +37,11 @@ pub fn handle(editor: &mut crate::editor::Editor) -> std::io::Result<()> {
                                     editor.has_edited = true;
                                 }
                                 if editor.cursor.normal.0 != 0 {
+                                    if event.modifiers.contains(KeyModifiers::CONTROL) {
+
+                                        return Ok(());
+                                    }
+
                                     editor.cursor.normal.0 -= 1;
 
                                     editor.buffer.lines[editor.cursor.normal.1 as usize]
@@ -162,10 +165,20 @@ pub fn handle(editor: &mut crate::editor::Editor) -> std::io::Result<()> {
 
                                 return Ok(());
                             }
+                            Modes::Normal => editor.mode = Modes::Insert,
                             _ => {}
                         },
                         KeyCode::Up => {
                             if editor.mode == Modes::Insert || editor.mode == Modes::Normal {
+                                if event.modifiers.contains(KeyModifiers::ALT) {
+                                    editor.cursor.normal.1 = 0;
+                                    editor.cursor.r#virtual = 0;
+                                    editor.screen = 0;
+
+                                    editor.redraw_screen()?;
+                                    return Ok(());
+                                }
+
                                 if editor.cursor.normal.1 != 0 {
                                     editor.cursor.normal.1 -= 1;
 
@@ -193,6 +206,19 @@ pub fn handle(editor: &mut crate::editor::Editor) -> std::io::Result<()> {
                         }
                         KeyCode::Down => {
                             if editor.mode == Modes::Insert || editor.mode == Modes::Normal {
+                                if event.modifiers.contains(KeyModifiers::ALT) {
+                                    editor.cursor.normal.1 = (editor.buffer.lines.len() - 1) as u16;
+                                    
+                                    if editor.buffer.lines.len() as u16 >= editor.size.1 {
+                                        editor.cursor.r#virtual = editor.size.1 - 2;
+                                        editor.screen = (editor.buffer.lines.len() + 1) as u16 - editor.size.1;
+                                    } else {
+                                        editor.cursor.r#virtual = (editor.buffer.lines.len() - 1) as u16;
+                                    }
+                                    editor.redraw_screen()?;
+                                    return Ok(());
+                                }
+                                
                                 if editor.cursor.normal.1 + 1 != editor.buffer.lines.len() as u16 {
                                     editor.cursor.normal.1 += 1;
 
@@ -216,11 +242,21 @@ pub fn handle(editor: &mut crate::editor::Editor) -> std::io::Result<()> {
                         }
                         KeyCode::Left => match editor.mode {
                             Modes::Insert | Modes::Normal => {
+                                if event.modifiers.contains(KeyModifiers::ALT) {
+                                    editor.cursor.normal.0 = 0;
+                                    return Ok(());
+                                }
+
                                 if editor.cursor.normal.0 != 0 {
                                     editor.cursor.normal.0 -= 1;
                                 }
                             }
                             Modes::Commanding => {
+                                if event.modifiers.contains(KeyModifiers::ALT) {
+                                    editor.cursor.command = 0;
+                                    return Ok(());
+                                }
+
                                 if editor.cursor.command != 0 {
                                     editor.cursor.command -= 1;
                                 }
@@ -229,6 +265,11 @@ pub fn handle(editor: &mut crate::editor::Editor) -> std::io::Result<()> {
                         },
                         KeyCode::Right => match editor.mode {
                             Modes::Insert | Modes::Normal => {
+                                if event.modifiers.contains(KeyModifiers::ALT) {
+                                    editor.cursor.normal.0 = editor.buffer.lines[editor.cursor.normal.1 as usize].len() as u16;
+                                    return Ok(());
+                                }
+
                                 if editor.cursor.normal.0
                                     != editor.buffer.lines[editor.cursor.normal.1 as usize].len()
                                         as u16
@@ -237,6 +278,11 @@ pub fn handle(editor: &mut crate::editor::Editor) -> std::io::Result<()> {
                                 }
                             }
                             Modes::Commanding => {
+                                if event.modifiers.contains(KeyModifiers::ALT) {
+                                    editor.cursor.command = editor.buffer.command.len() as u16;
+                                    return Ok(());
+                                }
+
                                 if editor.cursor.command != editor.buffer.command.len() as u16 {
                                     editor.cursor.command += 1;
                                 }
