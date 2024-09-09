@@ -2,10 +2,10 @@ mod buffer;
 mod editor;
 mod event;
 
-use clap::Parser;
-
 #[macro_use]
 extern crate crossterm;
+
+use clap::Parser;
 
 #[derive(clap::Parser, Debug)]
 #[command(about = "A terminal text editor", version = "0.1.0", author = "qwixck")]
