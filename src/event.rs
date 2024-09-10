@@ -38,7 +38,6 @@ pub fn handle(editor: &mut crate::editor::Editor) -> std::io::Result<()> {
                                 }
                                 if editor.cursor.normal.0 != 0 {
                                     if event.modifiers.contains(KeyModifiers::CONTROL) {
-
                                         return Ok(());
                                     }
 
@@ -100,12 +99,8 @@ pub fn handle(editor: &mut crate::editor::Editor) -> std::io::Result<()> {
                                                 as u16;
                                         }
                                     }
-
-                                    if editor.cursor.normal.1 != editor.buffer.lines.len() as u16 {
-                                        editor.redraw_screen()?;
-                                    }
+                                    editor.redraw_screen()?;
                                 }
-                                editor.redraw_screen()?;
                             }
                             Modes::Commanding => {
                                 if editor.cursor.command != 0 {
@@ -172,6 +167,17 @@ pub fn handle(editor: &mut crate::editor::Editor) -> std::io::Result<()> {
                             if editor.mode == Modes::Insert || editor.mode == Modes::Normal {
                                 if event.modifiers.contains(KeyModifiers::ALT) {
                                     editor.cursor.normal.1 = 0;
+
+                                    if editor.cursor.normal.0
+                                        > editor.buffer.lines[editor.cursor.normal.1 as usize].len()
+                                            as u16
+                                    {
+                                        editor.cursor.normal.0 = editor.buffer.lines
+                                            [editor.cursor.normal.1 as usize]
+                                            .len()
+                                            as u16;
+                                    }
+
                                     editor.cursor.r#virtual = 0;
                                     editor.screen = 0;
 
@@ -208,17 +214,29 @@ pub fn handle(editor: &mut crate::editor::Editor) -> std::io::Result<()> {
                             if editor.mode == Modes::Insert || editor.mode == Modes::Normal {
                                 if event.modifiers.contains(KeyModifiers::ALT) {
                                     editor.cursor.normal.1 = (editor.buffer.lines.len() - 1) as u16;
-                                    
+
+                                    if editor.cursor.normal.0
+                                        > editor.buffer.lines[editor.cursor.normal.1 as usize].len()
+                                            as u16
+                                    {
+                                        editor.cursor.normal.0 = editor.buffer.lines
+                                            [editor.cursor.normal.1 as usize]
+                                            .len()
+                                            as u16;
+                                    }
+
                                     if editor.buffer.lines.len() as u16 >= editor.size.1 {
                                         editor.cursor.r#virtual = editor.size.1 - 2;
-                                        editor.screen = (editor.buffer.lines.len() + 1) as u16 - editor.size.1;
+                                        editor.screen =
+                                            (editor.buffer.lines.len() + 1) as u16 - editor.size.1;
                                     } else {
-                                        editor.cursor.r#virtual = (editor.buffer.lines.len() - 1) as u16;
+                                        editor.cursor.r#virtual =
+                                            (editor.buffer.lines.len() - 1) as u16;
                                     }
                                     editor.redraw_screen()?;
                                     return Ok(());
                                 }
-                                
+
                                 if editor.cursor.normal.1 + 1 != editor.buffer.lines.len() as u16 {
                                     editor.cursor.normal.1 += 1;
 
@@ -266,7 +284,9 @@ pub fn handle(editor: &mut crate::editor::Editor) -> std::io::Result<()> {
                         KeyCode::Right => match editor.mode {
                             Modes::Insert | Modes::Normal => {
                                 if event.modifiers.contains(KeyModifiers::ALT) {
-                                    editor.cursor.normal.0 = editor.buffer.lines[editor.cursor.normal.1 as usize].len() as u16;
+                                    editor.cursor.normal.0 =
+                                        editor.buffer.lines[editor.cursor.normal.1 as usize].len()
+                                            as u16;
                                     return Ok(());
                                 }
 
@@ -304,8 +324,9 @@ pub fn handle(editor: &mut crate::editor::Editor) -> std::io::Result<()> {
                                     editor.has_edited = true;
                                 }
                                 editor.buffer.lines[editor.cursor.normal.1 as usize]
-                                    .push_str("    ");
+                                    .insert_str(editor.cursor.normal.0 as usize, "    ");
                                 editor.cursor.normal.0 += 4;
+                                editor.redraw_line()?;
                             }
                             Modes::Commanding => {
                                 editor.buffer.command.push_str("    ");
