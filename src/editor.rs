@@ -205,10 +205,43 @@ impl Editor {
                     self.draw_error(err.to_string())?
                 }
             }
-            ":" => self.redraw_status()?,
+            "" => self.redraw_status()?,
             unknown => {
                 if unknown.starts_with("goto") {
                     self.draw_error("Not implemented".to_string())?;
+                } else if unknown.split(" ").nth(0) == Option::from("w") {
+                    match unknown.split(" ").nth(1) {
+                        Some(path) => {
+                            self.buffer.path = path.to_owned();
+                            match self.buffer.save() {
+                                Ok(_) => self.draw_info(format!(
+                                    "Successfully saved {}",
+                                    self.buffer.path
+                                ))?,
+                                Err(err) => self.draw_error(err.to_string())?,
+                            }
+                        }
+                        None => {
+                            self.draw_error("No specified path".to_string())?;
+                        }
+                    }
+                } else if unknown.split(" ").nth(0) == Option::from("wq") {
+                    if unknown.split(" ").count() == 2  {
+                        match unknown.split(" ").nth(1) {
+                            Some(path) => {
+                                self.buffer.path = path.to_owned();
+                                match self.buffer.save() {
+                                    Ok(_) => self.window = false,
+                                    Err(err) => self.draw_error(err.to_string())?,
+                                }
+                            }
+                            None => {
+                                self.draw_error("No specified path".to_string())?;
+                            }
+                        }
+                    } else {
+                        self.draw_error("Too many args".to_string())?;
+                    }
                 } else {
                     self.draw_error(format!("Unknown command: {}", unknown))?;
                 }
@@ -218,11 +251,20 @@ impl Editor {
         Ok(())
     }
 
-    pub fn draw_error(&self, error: String) -> Result<()> {
-        execute!(self.stdout.lock(), cursor::MoveTo(0, self.size.1))?;
-        execute!(self.stdout.lock(), Clear(ClearType::CurrentLine))?;
-        write!(self.stdout.lock(), "{}", format!("ERROR: {error}").on_red())?;
-        self.stdout.lock().flush()?;
+    pub fn draw_error(&mut self, error: String) -> Result<()> {
+        execute!(self.stdout, cursor::MoveTo(0, self.size.1))?;
+        execute!(self.stdout, Clear(ClearType::CurrentLine))?;
+        write!(self.stdout, "{}", format!("ERROR: {error}").on_red())?;
+        self.stdout.flush()?;
+
+        Ok(())
+    }
+
+    pub fn draw_info(&mut self, info: String) -> Result<()> {
+        execute!(self.stdout, cursor::MoveTo(0, self.size.1))?;
+        execute!(self.stdout, Clear(ClearType::CurrentLine))?;
+        write!(self.stdout, "{}", format!("INFO: {info}"))?;
+        self.stdout.flush()?;
 
         Ok(())
     }
