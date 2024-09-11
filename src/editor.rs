@@ -226,7 +226,7 @@ impl Editor {
                         }
                     }
                 } else if unknown.split(" ").nth(0) == Option::from("wq") {
-                    if unknown.split(" ").count() == 2  {
+                    if unknown.split(" ").count() == 2 {
                         match unknown.split(" ").nth(1) {
                             Some(path) => {
                                 self.buffer.path = path.to_owned();
@@ -240,7 +240,7 @@ impl Editor {
                             }
                         }
                     } else {
-                        self.draw_error("Too many args".to_string())?;
+                        self.draw_error("Too many arguments".to_string())?;
                     }
                 } else {
                     self.draw_error(format!("Unknown command: {}", unknown))?;
