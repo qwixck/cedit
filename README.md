@@ -17,3 +17,14 @@ cargo build --release
 ```
 cargo run --release -- --help
 ```
+
+### Quick binds
+`[ENTER]` - Enter Insert mod
+
+`[ESC]` - Enter Normal mode
+
+`[ALT] + [ARROWUP]/[ARROWDOWN]` - Go to the top/end of a file
+
+`[ALT] + [ARROWLEFT]/[ARROWRIGHT]` - Go to the beginning/end of a line
+
+`:` - Execute a command (only in Normal mode)
