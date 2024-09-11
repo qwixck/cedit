@@ -38,9 +38,47 @@ pub fn handle(editor: &mut crate::editor::Editor) -> std::io::Result<()> {
                                 }
                                 if editor.cursor.normal.0 != 0 {
                                     if event.modifiers.contains(KeyModifiers::CONTROL) {
+                                        if editor.cursor.normal.0 != 0 {
+                                            if editor.buffer.lines[editor.cursor.normal.1 as usize]
+                                                .chars()
+                                                .nth(editor.cursor.normal.0 as usize - 1)
+                                                .map(|c| c.is_whitespace())
+                                                == Some(true)
+                                            {
+                                                while editor.cursor.normal.0 != 0
+                                                    && editor.buffer.lines
+                                                        [editor.cursor.normal.1 as usize]
+                                                        .chars()
+                                                        .nth(editor.cursor.normal.0 as usize - 1)
+                                                        .map(|c| c.is_whitespace())
+                                                        == Some(true)
+                                                {
+                                                    editor.cursor.normal.0 -= 1;
+
+                                                    editor.buffer.lines
+                                                        [editor.cursor.normal.1 as usize]
+                                                        .remove(editor.cursor.normal.0 as usize);
+                                                }
+                                            } else {
+                                                while editor.cursor.normal.0 != 0
+                                                    && editor.buffer.lines
+                                                        [editor.cursor.normal.1 as usize]
+                                                        .chars()
+                                                        .nth(editor.cursor.normal.0 as usize - 1)
+                                                        .map(|c| !c.is_whitespace())
+                                                        == Some(true)
+                                                {
+                                                    editor.cursor.normal.0 -= 1;
+
+                                                    editor.buffer.lines
+                                                        [editor.cursor.normal.1 as usize]
+                                                        .remove(editor.cursor.normal.0 as usize);
+                                                }
+                                            }
+                                            editor.redraw_line()?;
+                                        }
                                         return Ok(());
                                     }
-
                                     editor.cursor.normal.0 -= 1;
 
                                     editor.buffer.lines[editor.cursor.normal.1 as usize]
@@ -99,7 +137,9 @@ pub fn handle(editor: &mut crate::editor::Editor) -> std::io::Result<()> {
                                                 as u16;
                                         }
                                     }
-                                    editor.redraw_screen()?;
+                                    if editor.cursor.normal.0 != 0 && editor.cursor.normal.1 != 0 {
+                                        editor.redraw_screen()?;
+                                    }
                                 }
                             }
                             Modes::Commanding => {
