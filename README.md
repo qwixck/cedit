@@ -19,7 +19,7 @@ cargo run --release -- --help
 ```
 
 ### Quick binds
-`[ENTER]` - Enter Insert mod
+`[ENTER]` - Enter Insert mode
 
 `[ESC]` - Enter Normal mode
 
