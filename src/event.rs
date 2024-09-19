@@ -102,7 +102,7 @@ pub fn handle(editor: &mut crate::editor::Editor) -> std::io::Result<()> {
                                             if editor.screen != 0 {
                                                 editor.scroll_up()?;
                                             } else {
-                                                editor.cursor.r#virtual -= 1;
+                                                editor.cursor.viewport.1 -= 1;
                                             }
 
                                             if editor.buffer.lines[editor.cursor.normal.1 as usize]
@@ -128,7 +128,7 @@ pub fn handle(editor: &mut crate::editor::Editor) -> std::io::Result<()> {
                                             if editor.screen != 0 {
                                                 editor.scroll_up()?;
                                             } else {
-                                                editor.cursor.r#virtual -= 1;
+                                                editor.cursor.viewport.1 -= 1;
                                             }
 
                                             editor.cursor.normal.0 = editor.buffer.lines
@@ -184,10 +184,10 @@ pub fn handle(editor: &mut crate::editor::Editor) -> std::io::Result<()> {
                                     editor.cursor.normal.0 = 0;
                                 }
 
-                                if editor.cursor.r#virtual == (editor.size.1 - 2) {
+                                if editor.cursor.viewport.1 == (editor.size.1 - 2) {
                                     editor.scroll_down()?;
                                 } else {
-                                    editor.cursor.r#virtual += 1;
+                                    editor.cursor.viewport.1 += 1;
                                 }
 
                                 editor.redraw_screen()?;
@@ -218,7 +218,7 @@ pub fn handle(editor: &mut crate::editor::Editor) -> std::io::Result<()> {
                                             as u16;
                                     }
 
-                                    editor.cursor.r#virtual = 0;
+                                    editor.cursor.viewport.1 = 0;
                                     editor.screen = 0;
 
                                     editor.redraw_screen()?;
@@ -229,13 +229,13 @@ pub fn handle(editor: &mut crate::editor::Editor) -> std::io::Result<()> {
                                     editor.cursor.normal.1 -= 1;
 
                                     if editor.screen != 0 {
-                                        if editor.cursor.r#virtual == 0 {
+                                        if editor.cursor.viewport.1 == 0 {
                                             editor.scroll_up()?;
                                         } else {
-                                            editor.cursor.r#virtual -= 1;
+                                            editor.cursor.viewport.1 -= 1;
                                         }
                                     } else {
-                                        editor.cursor.r#virtual -= 1;
+                                        editor.cursor.viewport.1 -= 1;
                                     }
 
                                     if editor.cursor.normal.0
@@ -266,11 +266,11 @@ pub fn handle(editor: &mut crate::editor::Editor) -> std::io::Result<()> {
                                     }
 
                                     if editor.buffer.lines.len() as u16 >= editor.size.1 {
-                                        editor.cursor.r#virtual = editor.size.1 - 2;
+                                        editor.cursor.viewport.1 = editor.size.1 - 2;
                                         editor.screen =
                                             (editor.buffer.lines.len() + 1) as u16 - editor.size.1;
                                     } else {
-                                        editor.cursor.r#virtual =
+                                        editor.cursor.viewport.1 =
                                             (editor.buffer.lines.len() - 1) as u16;
                                     }
                                     editor.redraw_screen()?;
@@ -280,10 +280,10 @@ pub fn handle(editor: &mut crate::editor::Editor) -> std::io::Result<()> {
                                 if editor.cursor.normal.1 + 1 != editor.buffer.lines.len() as u16 {
                                     editor.cursor.normal.1 += 1;
 
-                                    if editor.cursor.r#virtual == (editor.size.1 - 2) {
+                                    if editor.cursor.viewport.1 == (editor.size.1 - 2) {
                                         editor.scroll_down()?;
                                     } else {
-                                        editor.cursor.r#virtual += 1;
+                                        editor.cursor.viewport.1 += 1;
                                     }
 
                                     if editor.cursor.normal.0

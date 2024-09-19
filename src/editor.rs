@@ -12,15 +12,15 @@ pub enum Modes {
     Insert,
     Normal,
     Commanding,
-    _Visual,
+    Visual,
 }
 
 #[derive(Debug)]
 pub struct Cursor {
     pub normal: (u16, u16),
     pub command: u16,
-    pub r#virtual: u16,
-    pub _visual: (u16, u16),
+    pub viewport: (u16, u16),
+    pub visual: (u16, u16),
 }
 
 #[derive(Debug)]
@@ -41,7 +41,7 @@ impl std::fmt::Display for Modes {
             Modes::Insert => write!(f, "INSERT"),
             Modes::Normal => write!(f, "NORMAL"),
             Modes::Commanding => write!(f, "COMMAND"),
-            Modes::_Visual => write!(f, "VISUAL"),
+            Modes::Visual => write!(f, "VISUAL"),
         }
     }
 }
@@ -55,8 +55,8 @@ impl Editor {
             cursor: Cursor {
                 normal: (0, 0),
                 command: 0,
-                r#virtual: 0,
-                _visual: (0, 0),
+                viewport: (0, 0),
+                visual: (0, 0),
             },
             size: terminal::size()?,
             screen: 0,
@@ -76,7 +76,7 @@ impl Editor {
                 Modes::Insert | Modes::Normal => {
                     execute!(
                         self.stdout,
-                        cursor::MoveTo(self.cursor.normal.0, self.cursor.r#virtual)
+                        cursor::MoveTo(self.cursor.normal.0, self.cursor.viewport.1)
                     )?;
                 }
                 Modes::Commanding => {
@@ -98,7 +98,7 @@ impl Editor {
     }
 
     pub fn redraw_line(&mut self) -> Result<()> {
-        execute!(self.stdout, cursor::MoveTo(0, self.cursor.r#virtual))?;
+        execute!(self.stdout, cursor::MoveTo(0, self.cursor.viewport.1))?;
         execute!(self.stdout, Clear(ClearType::CurrentLine))?;
         write!(
             self.stdout,
@@ -110,7 +110,7 @@ impl Editor {
         Ok(())
     }
 
-    pub fn _redraw_line_at(&mut self, idx: u16) -> Result<()> {
+    pub fn redraw_line_at(&mut self, idx: u16) -> Result<()> {
         if idx > self.size.1 {
             panic!("index is bigger than terminal's screen height");
         }
