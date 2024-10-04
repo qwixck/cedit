@@ -209,7 +209,7 @@ impl Editor {
             unknown => {
                 if unknown.starts_with("goto") {
                     self.draw_error("Not implemented".to_string())?;
-                } else if unknown.split(" ").nth(0) == Option::from("w") {
+                } else if unknown.split(" ").nth(0) == Some("w") {
                     match unknown.split(" ").nth(1) {
                         Some(path) => {
                             self.buffer.path = path.to_owned();
@@ -225,7 +225,7 @@ impl Editor {
                             self.draw_error("No specified path".to_string())?;
                         }
                     }
-                } else if unknown.split(" ").nth(0) == Option::from("wq") {
+                } else if unknown.split(" ").nth(0) == Some("wq") {
                     if unknown.split(" ").count() == 2 {
                         match unknown.split(" ").nth(1) {
                             Some(path) => {
