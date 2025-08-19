@@ -14,10 +14,7 @@ impl crate::editor::Editor {
                                     self.buffer.command.push(':');
                                     self.cursor.command += 1;
                                 } else if self.mode == Modes::Commanding {
-                                    self
-                                        .buffer
-                                        .command
-                                        .insert(self.cursor.command as usize, x);
+                                    self.buffer.command.insert(self.cursor.command as usize, x);
                                     self.cursor.command += 1;
                                 } else if self.mode == Modes::Insert {
                                     if !self.has_edited {
@@ -85,13 +82,13 @@ impl crate::editor::Editor {
                                         self.redraw_line()?;
                                     } else {
                                         if self.cursor.normal.1 != 0 {
-                                            if !self.buffer.lines[self.cursor.normal.1 as usize].is_empty()
+                                            if !self.buffer.lines[self.cursor.normal.1 as usize]
+                                                .is_empty()
                                             {
                                                 let buf = self.buffer.lines
                                                     [self.cursor.normal.1 as usize]
                                                     .clone();
-                                                self
-                                                    .buffer
+                                                self.buffer
                                                     .lines
                                                     .remove(self.cursor.normal.1 as usize);
                                                 self.cursor.normal.1 -= 1;
@@ -102,7 +99,8 @@ impl crate::editor::Editor {
                                                     self.cursor.viewport.1 -= 1;
                                                 }
 
-                                                if !self.buffer.lines[self.cursor.normal.1 as usize].is_empty()
+                                                if !self.buffer.lines[self.cursor.normal.1 as usize]
+                                                    .is_empty()
                                                 {
                                                     self.cursor.normal.0 = self.buffer.lines
                                                         [self.cursor.normal.1 as usize]
@@ -114,8 +112,7 @@ impl crate::editor::Editor {
                                                 self.buffer.lines[self.cursor.normal.1 as usize]
                                                     .push_str(buf.as_str());
                                             } else {
-                                                self
-                                                    .buffer
+                                                self.buffer
                                                     .lines
                                                     .remove(self.cursor.normal.1 as usize);
                                                 self.cursor.normal.1 -= 1;
@@ -155,8 +152,7 @@ impl crate::editor::Editor {
                                         self.has_edited = true;
                                     }
 
-                                    self
-                                        .buffer
+                                    self.buffer
                                         .lines
                                         .insert(self.cursor.normal.1 as usize + 1, String::new());
 
