@@ -49,7 +49,7 @@ impl std::fmt::Display for Modes {
 impl Editor {
     pub fn new(buffer: Buffer) -> Result<Self> {
         Ok(Self {
-            buffer: buffer,
+            buffer,
             mode: Modes::Normal,
             stdout: io::stdout(),
             cursor: Cursor {
@@ -263,7 +263,7 @@ impl Editor {
     pub fn draw_info(&mut self, info: String) -> Result<()> {
         execute!(self.stdout, cursor::MoveTo(0, self.size.1))?;
         execute!(self.stdout, Clear(ClearType::CurrentLine))?;
-        write!(self.stdout, "{}", format!("INFO: {info}"))?;
+        write!(self.stdout, "INFO: {}", info)?;
         self.stdout.flush()?;
 
         Ok(())

@@ -19,17 +19,15 @@ impl crate::editor::Editor {
                                         .command
                                         .insert(self.cursor.command as usize, x);
                                     self.cursor.command += 1;
-                                } else {
-                                    if self.mode == Modes::Insert {
-                                        if !self.has_edited {
-                                            self.has_edited = true;
-                                        }
-
-                                        self.buffer.lines[self.cursor.normal.1 as usize]
-                                            .insert(self.cursor.normal.0 as usize, x);
-                                        self.cursor.normal.0 += 1;
-                                        self.redraw_line()?;
+                                } else if self.mode == Modes::Insert {
+                                    if !self.has_edited {
+                                        self.has_edited = true;
                                     }
+
+                                    self.buffer.lines[self.cursor.normal.1 as usize]
+                                        .insert(self.cursor.normal.0 as usize, x);
+                                    self.cursor.normal.0 += 1;
+                                    self.redraw_line()?;
                                 }
                             }
                             KeyCode::Backspace => match self.mode {
@@ -87,9 +85,7 @@ impl crate::editor::Editor {
                                         self.redraw_line()?;
                                     } else {
                                         if self.cursor.normal.1 != 0 {
-                                            if self.buffer.lines[self.cursor.normal.1 as usize]
-                                                .len()
-                                                != 0
+                                            if !self.buffer.lines[self.cursor.normal.1 as usize].is_empty()
                                             {
                                                 let buf = self.buffer.lines
                                                     [self.cursor.normal.1 as usize]
@@ -106,9 +102,7 @@ impl crate::editor::Editor {
                                                     self.cursor.viewport.1 -= 1;
                                                 }
 
-                                                if self.buffer.lines[self.cursor.normal.1 as usize]
-                                                    .len()
-                                                    != 0
+                                                if !self.buffer.lines[self.cursor.normal.1 as usize].is_empty()
                                                 {
                                                     self.cursor.normal.0 = self.buffer.lines
                                                         [self.cursor.normal.1 as usize]

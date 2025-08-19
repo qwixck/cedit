@@ -16,13 +16,13 @@ impl Buffer {
                 file.read_to_string(&mut buf).unwrap();
                 Ok(Self {
                     lines: buf.lines().map(|line| line.to_string()).collect(),
-                    path: path,
+                    path,
                     command: String::new(),
                 })
             }
             Err(_) => Ok(Self {
                 lines: vec!["".to_string()],
-                path: path,
+                path,
                 command: String::new(),
             }),
         }
@@ -31,9 +31,7 @@ impl Buffer {
         match File::create(&self.path) {
             Ok(mut file) => {
                 for line in self.lines.iter() {
-                    if let Err(err) = file.write(format!("{line}\n").as_bytes()) {
-                        return Err(err);
-                    }
+                    file.write_all(format!("{line}\n").as_bytes())?;
                 }
             }
             Err(err) => return Err(err),
