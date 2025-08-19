@@ -88,7 +88,7 @@ impl Editor {
                 _ => {}
             }
 
-            crate::event::handle(self)?;
+            self.handle()?;
         }
 
         execute!(self.stdout, terminal::LeaveAlternateScreen)?;
